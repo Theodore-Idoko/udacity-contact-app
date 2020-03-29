@@ -1,26 +1,54 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react';
+import ListContacts from './ListContacts';
+import * as ContactsAPI from './utils/ContactsAPI';
+import CreateContact from './CreateContact';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+class App extends Component {
+  state = {
+    contacts: [],
+    screen: 'list'
+  }
+
+  componentDidMount() {
+    ContactsAPI.getAll()
+      .then((contacts) => {
+        this.setState(() => ({
+          contacts
+        }))
+      })
+  }
+
+  removeContact = contact => {
+    this.setState ((currentState) => ({
+      contacts: currentState.contacts.filter((c) => {
+        return c.id !== contact.id
+      })
+    }))
+    ContactsAPI.remove(contact)
+  }
+
+  render() {
+    return (
+      <div>
+        {this.state.screen === 'list' &&(
+          <ListContacts 
+          contacts={this.state.contacts}
+          onDeleteContact = {this.removeContact}
+          onNavigate={() => {
+            this.setState(() => ({
+              screen: 'create'
+            }))
+          }}
+          />
+        )}
+        {this.state.screen === 'create' &&(
+          <CreateContact />
+        )}
+        
+      </div>
+    );
+  }
 }
 
 export default App;
